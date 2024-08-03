@@ -1,9 +1,22 @@
+const { generateToken } = require("../config/jwtAuth");
 const User = require("../model/userModel");
-async function handleUserLogin(req, res) {
+const handleUserLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
-  } catch (error) {}
-}
+    const user = await User.findOne({ email: email });
+    if (!user || !(await user.comparePassword(password))) {
+      return res.status(401).json({ error: "invalid username or password " });
+    }
+    // create payload obj for token
+    const payload = {
+      id: user.id,
+    };
+    const token = await generateToken(payload);
+    return res.status(200).json({ data: user, token: token });
+  } catch (error) {
+    return res.status(500).json({ error: "internal Server Error" });
+  }
+};
 const handleUserSignup = async (req, res) => {
   try {
     //get user data from body
@@ -20,8 +33,14 @@ const handleUserSignup = async (req, res) => {
     //save the new user to database
     const response = await newUser.save();
 
-    console.log("data saved", response);
-    return res.status(200).json({ response: response });
+    // create payload obj for token
+    const payload = {
+      id: response.id,
+    };
+    const token = await generateToken(payload);
+    console.log("data saved", token);
+
+    res.status(200).json({ response: response, token: token });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });

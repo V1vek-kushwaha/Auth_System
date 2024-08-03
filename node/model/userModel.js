@@ -55,5 +55,17 @@ UserSchema.pre("save", async function (next) {
   }
 });
 
+//for compare password
+UserSchema.methods.comparePassword = async function (candidatePassword) {
+  try {
+    // use bcrypt to compair the provided password with the hashed password
+    const isMatch = await bcrypt.compare(candidatePassword, this.password);
+
+    return isMatch;
+  } catch (error) {
+    throw error;
+  }
+};
+
 const User = model("user", UserSchema);
 module.exports = User;
