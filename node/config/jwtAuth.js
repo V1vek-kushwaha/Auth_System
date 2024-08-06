@@ -22,7 +22,7 @@ const isAuth = async (req, res, next) => {
 //function to generate JWT token
 const generateToken = async (userData) => {
   // generate token
-  return jwt.sign(userData, process.env.SECRET_KEY, { expiresIn: "1d" });
+  return jwt.sign(userData, process.env.SECRET_KEY,  { expiresIn: "1d" });
   // somw time if time ex not work then convert userData in obj (jwt issue)
   // return jwt.sign({userData}, process.env.SECRET_KEY, { expiresIn: "1d" });
 };

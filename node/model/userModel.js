@@ -2,11 +2,7 @@ const { Schema, model } = require("mongoose");
 const bcrypt = require("bcrypt");
 const UserSchema = new Schema(
   {
-    firstname: {
-      type: String,
-      require: true,
-    },
-    lastname: {
+    name: {
       type: String,
       require: true,
     },
@@ -19,14 +15,24 @@ const UserSchema = new Schema(
       type: String,
       require: true,
     },
+    profileImg: {
+      type: String,
+      require: false,
+    },
+
     password: {
       type: String,
       require: true,
     },
+    is_verified: {
+      type: Boolean,
+      require: true,
+      default: false,
+    },
     usertype: {
       type: String,
       require: true,
-      enum: ["normal", "admin"],
+      enum: ["normal", "admin", "superAdmin"],
       default: "normal",
     },
   },
