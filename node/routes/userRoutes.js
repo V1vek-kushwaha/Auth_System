@@ -2,6 +2,8 @@ const { Router } = require("express");
 const {
   handleUserLogin,
   handleUserSignup,
+  sendMailVerification,
+  forgotPassword,
 } = require("../controller/userController");
 const router = Router();
 
@@ -34,7 +36,11 @@ const upload = multer({
   fileFilter: fileFilter,
 });
 
-const { signupValidator } = require("../utils/validation");
+const {
+  signupValidator,
+  sendMailVerificationValidator,
+  passwordValidator,
+} = require("../utils/validation");
 
 router.post("/login", handleUserLogin);
 router.post(
@@ -43,4 +49,12 @@ router.post(
   signupValidator,
   handleUserSignup
 );
+
+router.post(
+  "/send-mail-verification",
+  sendMailVerificationValidator,
+  sendMailVerification
+);
+
+router.post("/forgot-password", passwordValidator, forgotPassword);
 module.exports = router;

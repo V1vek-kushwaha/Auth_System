@@ -28,3 +28,15 @@ exports.signupValidator = [
   //     })
   //     .withMessage("please upload an image Jpeg ,PNG"),
 ];
+
+exports.sendMailVerificationValidator = [
+  check("email", "please include valid Email").isEmail().normalizeEmail({
+    gmail_remove_dots: true,
+  }),
+];
+
+exports.passwordValidator = [
+  check("email", "please include valid Email").isEmail().normalizeEmail({
+    gmail_remove_dots: true,
+  }),
+];

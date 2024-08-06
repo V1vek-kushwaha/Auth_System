@@ -6,8 +6,6 @@ const path = require("path");
 
 const { mailVerification } = require("../controller/userController");
 
-// router.get("/", mailVerification);
-router.get("/", (req, res) => {
-  res.render("404");
-});
+router.get("/", mailVerification);
+
 module.exports = router;

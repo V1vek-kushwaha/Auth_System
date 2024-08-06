@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const path = require("path");
 require("dotenv").config();
 const bodyParser = require("body-parser");
 const PORT = process.env.SERVER_PORT || 8000;
@@ -13,7 +14,7 @@ connectDB();
 app.use(bodyParser.json());
 
 app.set("view engine", "ejs");
-app.set("views", "./views");
+app.set("views", path.resolve("./views"));
 
 app.get("/", (req, res) => {
   return res.send("Server Running Smoothly..🚀");

@@ -11,6 +11,10 @@ const UserSchema = new Schema(
       require: true,
       unique: true,
     },
+    phone: {
+      type: String,
+      required: false,
+    },
     dob: {
       type: String,
       require: true,
@@ -28,6 +32,12 @@ const UserSchema = new Schema(
       type: Boolean,
       require: true,
       default: false,
+    },
+    status: {
+      type: String,
+      required: false,
+      default: "Active",
+      enum: ["Active", "Inactive"],
     },
     usertype: {
       type: String,
