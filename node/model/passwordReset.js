@@ -15,5 +15,5 @@ const passwordResetSchema = new Schema(
   { timestamps: true }
 );
 
-const passResetSchema = model("passwordreset", passwordResetSchema);
-module.exports = passResetSchema;
+const passwordReset = model("passwordreset", passwordResetSchema);
+module.exports = passwordReset;

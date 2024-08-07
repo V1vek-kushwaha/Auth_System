@@ -4,6 +4,8 @@ const {
   handleUserSignup,
   sendMailVerification,
   forgotPassword,
+  userProfile,
+  UpdateuserProfile,
 } = require("../controller/userController");
 const router = Router();
 
@@ -40,9 +42,12 @@ const {
   signupValidator,
   sendMailVerificationValidator,
   passwordValidator,
+  loginValidator,
+  updateProfileValidator,
 } = require("../utils/validation");
+const { isAuth } = require("../middleware/jwtAuth");
 
-router.post("/login", handleUserLogin);
+router.post("/login", loginValidator, handleUserLogin);
 router.post(
   "/signup",
   upload.single("profileImg"),
@@ -57,4 +62,12 @@ router.post(
 );
 
 router.post("/forgot-password", passwordValidator, forgotPassword);
+router.get("/profile", isAuth, userProfile);
+router.post(
+  "/update-profile",
+  isAuth,
+  upload.single("profileImg"),
+
+  UpdateuserProfile
+);
 module.exports = router;

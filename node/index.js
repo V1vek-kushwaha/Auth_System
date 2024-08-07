@@ -20,7 +20,7 @@ app.get("/", (req, res) => {
   return res.send("Server Running Smoothly..🚀");
 });
 app.use("/api", userRouter);
-app.use("/mail-verification", authRouter);
+app.use("/auth", authRouter);
 
 app.listen(PORT, () =>
   console.log(`server is running http://localhost:${PORT}`)

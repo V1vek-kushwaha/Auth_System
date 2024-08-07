@@ -40,3 +40,17 @@ exports.passwordValidator = [
     gmail_remove_dots: true,
   }),
 ];
+
+exports.loginValidator = [
+  check("email", "please include valid Email").isEmail().normalizeEmail({
+    gmail_remove_dots: true,
+  }),
+  check("password", "please enter Valid password").not().isEmpty(),
+];
+
+exports.updateProfileValidator = [
+  check("name", "Name is Required").not().isEmpty(),
+
+  check("phone", "Name is Required").not().isEmpty(),
+  check("dob", "Name is Required").not().isEmpty(),
+];

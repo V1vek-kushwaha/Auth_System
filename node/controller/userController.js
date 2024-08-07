@@ -1,13 +1,17 @@
-const { generateToken } = require("../config/jwtAuth");
+const { generateToken } = require("../middleware/jwtAuth");
 const User = require("../model/userModel");
 const { validationResult } = require("express-validator");
 const mailer = require("../utils/mailer");
 
 const randomString = require("randomstring");
-const passwordReset = require("../model/passwordReset");
 const passResetSchema = require("../model/passwordReset");
+const passwordReset = require("../model/passwordReset");
 const handleUserLogin = async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, errors: errors.array() });
+    }
     const { email, password } = req.body;
     const user = await User.findOne({ email: email });
     if (!user || !(await user.comparePassword(password))) {
@@ -48,7 +52,7 @@ const handleUserSignup = async (req, res) => {
     const response = await newUser.save();
 
     // Assuming 'response.id' needs to be replaced with something else
-    const verificationLink = `http://localhost:8000/mail-verification?id=${userData.id}`;
+    const verificationLink = `http://localhost:8000/auth/mail-verification?id=${userData.id}`;
     const msg = `<p>Hi ${userData.name}, please <a href="${verificationLink}">Verify</a> your email.</p>`;
 
     mailer.sendMail(userData.email, "Mail Verification", msg);
@@ -123,7 +127,7 @@ const sendMailVerification = async (req, res) => {
     }
 
     // Assuming 'response.id' needs to be replaced with something else
-    const verificationLink = `http://localhost:8000/mail-verification?id=${userData.id}`;
+    const verificationLink = `http://localhost:8000/auth/mail-verification?id=${userData.id}`;
     const msg = `<p>Hi ${userData.name}, please <a href="${verificationLink}">Verify</a> your email.</p>`;
 
     // Assuming 'mailer.sendMail' is asynchronous and returns a promise
@@ -154,11 +158,14 @@ const forgotPassword = async (req, res) => {
     const msg =
       "<p>hi " +
       userData.name +
-      ',please check <a href="http://localhost:8000/reset-password?token=' +
+      ',please check <a href="http://localhost:8000/auth/reset-password?token=' +
       randomstring +
       '">here</a>to reset your password</p>';
+
+    await passResetSchema.deleteMany({ user_Id: userData.id });
+
     const passwordReset = new passResetSchema({
-      user_id: userData._id,
+      user_Id: userData._id,
       token: randomstring,
     });
     await passwordReset.save();
@@ -172,11 +179,106 @@ const forgotPassword = async (req, res) => {
     return res.status(400).json({ msg: `${error.message} catch` });
   }
 };
+const resetPassword = async (req, res) => {
+  try {
+    console.log(req);
+    if (req.query.token == undefined) {
+      return res.render("404");
+    }
 
+    const resetData = await passResetSchema.findOne({
+      token: req.query.token,
+    });
+
+    if (!resetData) {
+      return res.render("404");
+    }
+
+    return res.render("reset-password", { resetData: resetData });
+  } catch (error) {
+    return res.status(400).json({ msg: `${error.message}` });
+  }
+};
+const updatePassword = async (req, res) => {
+  try {
+    const { password, cpassword, user_Id } = req.body;
+    const resetData = await passResetSchema.findOne({ user_Id });
+    if (password !== cpassword) {
+      return res.render("reset-password", {
+        resetData: resetData,
+        error: "Confirm Password not Matching",
+      });
+    }
+
+    const user = await User.findById({ _id: user_Id });
+
+    user.password = cpassword;
+    await user.save();
+
+    await passwordReset.deleteOne({ user_Id });
+    return res.redirect("/auth/reset-success");
+  } catch (error) {
+    return res.status(400).json({ msg: `${error.message}` });
+  }
+};
+const resetsuccess = async (req, res) => {
+  try {
+    return res.render("reset-success");
+  } catch (error) {}
+};
+const userProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const userData = await User.findById({ _id: userId });
+    return res.status(200).json({
+      success: true,
+      data: userData,
+    });
+  } catch (error) {
+    return res.status(400).json({ msg: `${error.message}` });
+  }
+};
+const UpdateuserProfile = async (req, res) => {
+  try {
+    // const errors = validationResult(req);
+    // if (!errors.isEmpty()) {
+    //   return res.status(400).json({ success: false, errors: errors.array() });
+    // }
+    const userId = req.user.id;
+    const { name, phone, dob } = req.body;
+    const data = {
+      name,
+      phone,
+      dob,
+    };
+    if (req.file !== undefined) {
+      data.profileImg = "image/" + req.file.filename;
+    }
+    const updatedData = await User.findByIdAndUpdate(
+      { _id: userId },
+      {
+        $set: data,
+      },
+      { new: true }
+    );
+    return res.status(200).json({
+      success: true,
+      mgs: "User Profile Updated",
+      data: updatedData,
+    });
+  } catch (error) {
+    return res.status(400).json({ msg: `${error.message}` });
+  }
+};
 module.exports = {
   handleUserLogin,
   handleUserSignup,
   mailVerification,
   sendMailVerification,
   forgotPassword,
+  resetPassword,
+  updatePassword,
+  resetsuccess,
+  userProfile,
+  UpdateuserProfile,
 };
