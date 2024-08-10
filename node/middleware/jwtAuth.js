@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const Blacklist = require("../model/blackListTokens");
 
 //jwt authentication middleware for extract auth token and Verify  from headers
 const isAuth = async (req, res, next) => {
@@ -8,6 +9,14 @@ const isAuth = async (req, res, next) => {
 
     if (!token) {
       return res.status(401).json({ error: "Unauthorized Access" });
+    }
+
+    const BlacklistTokens = await Blacklist.findOne({ token: token });
+    if (BlacklistTokens) {
+      return res.status(401).json({
+        success: false,
+        msg: "This session has expired, please login again !",
+      });
     }
 
     try {

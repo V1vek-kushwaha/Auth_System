@@ -6,6 +6,7 @@ const mailer = require("../utils/mailer");
 const randomString = require("randomstring");
 const passResetSchema = require("../model/passwordReset");
 const passwordReset = require("../model/passwordReset");
+const Blacklist = require("../model/blackListTokens");
 const handleUserLogin = async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -270,6 +271,27 @@ const UpdateuserProfile = async (req, res) => {
     return res.status(400).json({ msg: `${error.message}` });
   }
 };
+
+const handleLogout = async (req, res) => {
+  // Split the Authorization header to get the token
+  const token = req.headers.authorization.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ error: "Authorization header is missing" });
+  }
+
+  const newBlackList = new Blacklist({
+    token: token,
+  });
+  await newBlackList.save();
+  //delete cookies and storage
+  res.setHeader(`Clear-Site-Data`, '"cookies","storage"');
+  return res.status(200).json({
+    success: true,
+    msg: "You are Logged out!",
+  });
+};
+
 module.exports = {
   handleUserLogin,
   handleUserSignup,
@@ -281,4 +303,5 @@ module.exports = {
   resetsuccess,
   userProfile,
   UpdateuserProfile,
+  handleLogout,
 };

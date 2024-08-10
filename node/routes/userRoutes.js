@@ -6,6 +6,7 @@ const {
   forgotPassword,
   userProfile,
   UpdateuserProfile,
+  handleLogout,
 } = require("../controller/userController");
 const router = Router();
 
@@ -70,4 +71,5 @@ router.post(
 
   UpdateuserProfile
 );
+router.post("/logout", isAuth, handleLogout);
 module.exports = router;
